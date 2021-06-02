@@ -8,18 +8,13 @@ const mysqlConnection = mysql.createConnection({
     multipleStatements: true
 });
 
-function startConnection() {
-    mysqlConnection.connect(function (err) {
-        if (err) {
-            console.log(err);
-            return;
-        } else {
-            console.log('Database is connected');
-        }
-    });
-}
+mysqlConnection.connect(function (err) {
+    if (err) {
+        console.log(err);
+        return;
+    } else {
+        console.log('Database is connected');
+    }
+});
 
-module.exports = {
-    startConnection,
-    mysqlConnection
-}
+module.exports = mysqlConnection;
