@@ -1,4 +1,4 @@
-const { mysqlConnection } = require('../database');
+const mysqlConnection = require('../database');
 
 function getCursos(req, res) {
     mysqlConnection.query('SELECT * FROM cursos', (err, rows) => {

@@ -1,5 +1,5 @@
 var jwt = require('jsonwebtoken');
-const { mysqlConnection } = require('../database');
+const mysqlConnection = require('../database');
 
 function autheUser(req, res) {
     const { username, password } = req.body;
