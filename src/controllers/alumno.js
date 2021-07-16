@@ -61,11 +61,23 @@ function createAlumno(req, res) {
     const { nombres, apellidos, dni, celular, mail, direccion_calle, direccion_numero, direccion_barrio, direccion_localidad, fecha_nacimiento } = req.body;
 
     let sql = 'INSERT INTO alumnos(nombres, apellidos, dni, celular, mail, direccion_calle, direccion_numero, direccion_barrio, direccion_localidad, fecha_nacimiento) VALUES (?,?,?,?,?,?,?,?,?,?)';
-    let valores = [nombres, apellidos, dni, celular, mail, direccion_calle, direccion_numero, direccion_barrio, direccion_localidad, fecha_nacimiento];
+    let valores = [nombres, apellidos, dni, celular, mail, direccion_calle, direccion_numero, direccion_barrio, direccion_localidad, fecha_nacimiento.slice(0,10)];
 
     mysqlConnection.query(sql, valores, (err) => {
         if (!err) {
-            res.json({ ok: true });
+            mysqlConnection.query('SELECT alumnos_id FROM alumnos WHERE dni=?', [dni], (err, row) => {
+                if (!err) {
+                    mysqlConnection.query('INSERT INTO inscripciones(id_comisiones, id_alumnos) VALUES (?,?)', [req.body.id_comisiones, row[0].alumnos_id], (err) => {
+                        if (!err) {
+                            res.json({ ok: true });
+                        } else {
+                            res.json({ ok: false, err });
+                        }
+                    });
+                } else {
+                    console.log(err);
+                }
+            });
         } else {
             console.log(err);
         }

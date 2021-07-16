@@ -98,12 +98,35 @@ function getAdminCurso(req, res) {
     } else {
         const { id } = req.params;
 
-        let sql = 'SELECT cu.nombre, cu.descripcion, cu.publico_destinado, cu.requisitos, cu.url_imagen_presentacion, cu.url_video_presentacion, cu.precio_inscripcion, cu.precio_cuota, cu.cantidad_cuotas, cu.id_subrubros, cu.estado_publicacion, cu.habilita_inscripcion FROM cursos AS cu WHERE cu.id_cursos = ?';
+        let sql = 'SELECT cu.nombre AS nombreCu, cu.descripcion, cu.publico_destinado, cu.requisitos, cu.url_imagen_presentacion, cu.url_video_presentacion, cu.precio_inscripcion, cu.precio_cuota, cu.cantidad_cuotas, cu.id_subrubros, cu.estado_publicacion, cu.habilita_inscripcion, co.nombre AS nombreCo, co.horario_dias FROM cursos AS cu JOIN comisiones AS co ON cu.id_cursos = co.id_cursos WHERE cu.id_cursos = ?';
 
         mysqlConnection.query(sql, [id], (err, row) => {
             if (!err) {
                 if (row.length > 0) {
-                    res.json(row);
+                    let curso = {
+                        nombre: row[0].nombreCu,
+                        descripcion: row[0].descripcion,
+                        publico_destinado: row[0].publico_destinado,
+                        requisitos: row[0].requisitos,
+                        url_imagen_presentacion: row[0].url_imagen_presentacion,
+                        url_video_presentacion: row[0].url_video_presentacion,
+                        precio_inscripcion: row[0].precio_inscripcion,
+                        precio_cuota: row[0].precio_cuota,
+                        cantidad_cuotas: row[0].cantidad_cuotas,
+                        id_subrubros: row[0].id_subrubros,
+                        estado_publicacion: row[0].estado_publicacion,
+                        habilita_inscripcion: row[0].habilita_inscripcion,
+                        comisiones: []
+                    };
+
+                    row.forEach(com => {
+                        curso.comisiones.push({
+                            nombre: com.nombreCo,
+                            horario_dias: com.horario_dias
+                        });
+                    });
+
+                    res.json({ ok: true, curso });
                 }
             } else {
                 res.json({ ok: false, err });
@@ -128,6 +151,21 @@ function createCurso(req, res) {
 
     let sql = 'INSERT INTO cursos(nombre, descripcion, publico_destinado, requisitos, url_imagen_presentacion, url_video_presentacion, precio_inscripcion, precio_cuota, cantidad_cuotas, id_subrubros, estado_publicacion, habilita_inscripcion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
     let valores = [nombre, descripcion, publico_destinado, requisitos, url_imagen_presentacion, url_video_presentacion, precio_inscripcion, precio_cuota, cantidad_cuotas, id_subrubros, estado_publicacion, habilita_inscripcion];
+
+    mysqlConnection.query(sql, valores, (err) => {
+        if (!err) {
+            res.json({ ok: true });
+        } else {
+            res.json({ ok: false, err });
+        }
+    });
+}
+
+function createComision(req, res) {
+    const { nombre, descripcion, horario_dias, cupo } = req.body;
+
+    let sql = 'INSERT INTO comisiones(nombre, descripcion, horario_dias, id_cursos, cupo) VALUES (?,?,?,?,?)';
+    let valores = [nombre, descripcion, horario_dias, req.body.id_cursos, cupo];
 
     mysqlConnection.query(sql, valores, (err) => {
         if (!err) {
@@ -171,6 +209,7 @@ module.exports = {
     getAdminCurso,
     deleteCurso,
     createCurso,
+    createComision,
     updateCurso,
     getSubrubro
 }

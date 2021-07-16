@@ -13,7 +13,7 @@ function autheUser(req, res) {
                 // ANY DATA
             };
             var token = jwt.sign(tokenData, 'Secret Password', {
-                expiresIn: 60 * 60 // expires in 24 hours
+                expiresIn: 60 * 60 * 2 // expires in 24 hours
             });
         
             res.json({
